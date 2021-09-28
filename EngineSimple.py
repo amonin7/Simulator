@@ -44,6 +44,7 @@ class Engine:
         self.isDoneStatuses = []
         self.isSentRequest = []
         self.state = []
+        self.subs_am = 0
 
     # TODO: вынести в отдельный метод вне ENGINE
     def initializeAll(self) -> None:
@@ -162,6 +163,7 @@ class Engine:
             if i > self.processes_amount + 1:
                 break
 
+        print(f"subs_am={self.subs_am}")
         self.route_collector.save()
         self.comm_collector.save()
 
@@ -178,21 +180,18 @@ class Engine:
         if command == "put_message":
             if self.timers[proc_id] < message.timestamp:
                 self.route_collector.write(proc_id,
-                                           str(round(self.timers[proc_id], 7)) + '-' + str(
-                                               round(message.timestamp, 7)),
+                                           f"{round(self.timers[proc_id], 7):.7f}-{round(message.timestamp, 7):.7f}",
                                            'Await for receive',
                                            '-')
                 self.route_collector.write(proc_id,
-                                           str(round(message.timestamp, 7)) + '-' + str(
-                                               round(message.timestamp + time_for_rcv, 7)),
+                                           f"{round(message.timestamp, 7):.7f}-{round(message.timestamp + time_for_rcv, 7):.7f}",
                                            'Receive',
                                            message.mes_type)
                 self.downtime[proc_id] += message.timestamp - self.timers[proc_id]
                 self.timers[proc_id] = message.timestamp + time_for_rcv
             else:
                 self.route_collector.write(proc_id,
-                                           str(round(self.timers[proc_id], 7)) + '-' + str(
-                                               round(self.timers[proc_id] + time_for_rcv, 7)),
+                                           f"{round(self.timers[proc_id], 7):.7f}-{round(self.timers[proc_id] + time_for_rcv, 7):.7f}",
                                            'Receive',
                                            message.mes_type)
                 self.timers[proc_id] += time_for_rcv
@@ -210,12 +209,12 @@ class Engine:
             return "nothing_to_receive", []
 
     def solve(self, proc_id, tasks_amount):
-        state, _, time = self.solvers[proc_id].solve(tasks_amount)
+        state, subs_am, time = self.solvers[proc_id].solve(tasks_amount)
+        self.subs_am += subs_am
         if state == "solved":
             # command = "balance"
             self.route_collector.write(proc_id,
-                                       str(round(self.timers[proc_id], 7)) + '-' + str(
-                                           round(self.timers[proc_id] + time, 7)),
+                                       f"{round(self.timers[proc_id], 7):.7f}-{round(self.timers[proc_id] + time, 7):.7f}",
                                        'Solve',
                                        'tasks_am=' + str(tasks_amount))
             self.timers[proc_id] += time
@@ -228,8 +227,7 @@ class Engine:
                                                                  subs_amount=subs_amount,
                                                                  add_args=add_args)
         self.route_collector.write(proc_id,
-                                   str(round(self.timers[proc_id], 7)) + '-' + str(
-                                       round(self.timers[proc_id] + time, 7)),
+                                   f"{round(self.timers[proc_id], 7):.7f}-{round(self.timers[proc_id] + time, 7):.7f}",
                                    'Balance',
                                    'state=' + state)
         self.timers[proc_id] += time
@@ -407,8 +405,7 @@ class Engine:
 
     def save_time(self, proc_id, timestamp, dest_proc):
         self.route_collector.write(proc_id,
-                                   str(round(self.timers[proc_id], 7)) + '-' + str(
-                                       round(self.timers[proc_id] + timestamp, 7)),
+                                   f"{round(self.timers[proc_id], 7):.7f}-{round(self.timers[proc_id] + timestamp, 7):.7f}",
                                    'Send',
                                    'dest=' + str(dest_proc))
         self.timers[proc_id] += timestamp
@@ -416,5 +413,5 @@ class Engine:
 
 if __name__ == "__main__":
     # proc_am = [10, 50, 100, 200, 500, 1000]
-    eng = Engine(proc_amount=5, max_depth=20)
+    eng = Engine(proc_amount=10, max_depth=20)
     eng.run()

@@ -52,9 +52,8 @@ class SimpleSolver:
     # функция выдающая с вероятностью р '1' и 1-р '0'
     # вероятность р = (текущая глубина дерева) / (макс глубину дерева)
     def generateContinueOrNot(self, subProblem):
-        return random.choices([0, 1],
-                              weights=[float(subProblem.depth) / float(self.max_depth),
-                                       1 - float(subProblem.depth) / float(self.max_depth)])[0]
+        p = (float(subProblem.depth) / float(self.max_depth)) ** 5
+        return random.choices([0, 1], weights=[p, 1 - p])[0]
 
     # непосредственное ветвление одной вершины
     def ramify(self):
@@ -78,10 +77,13 @@ class SimpleSolver:
             self.records = i
             time = i * self.prc_slv
             self.is_record_updated = True
+            return "solved", n, time
         elif n == -1:
             self.is_record_updated = True
+            cnt = 0
             while len(self.subproblems) != 0:
                 self.records += 1
+                cnt += 1
                 self.ramify()
                 time += self.prc_slv
-        return "solved", self.getInfo(), time
+            return "solved", cnt, time
