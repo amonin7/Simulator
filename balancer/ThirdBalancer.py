@@ -29,7 +29,8 @@ class MasterBalancer(sb.SimpleBalancer):
                     return "send_subs", [sender, get_amount], self.prc_blnc
                 elif subs_amount < get_amount:
                     return "send_subs", [sender, subs_amount], self.prc_blnc
-            return "send_subs", [-1, -1], self.prc_blnc
+            else:
+                raise Exception(f"Wrong args list format: {add_args}")
         elif state == "received" or state == "received_put_subs_and_rec":
             self.state = "receive"
             return "receive", [], self.prc_blnc
