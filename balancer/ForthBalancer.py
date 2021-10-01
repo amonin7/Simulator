@@ -25,14 +25,14 @@ class MasterBalancer(sb.SimpleBalancer):
                     self.alive_proc_am -= 1
                     return "send_exit", [sender], self.prc_blnc
                 elif subs_amount >= get_amount:
-                    return "send_subs", [sender, get_amount], self.prc_blnc
+                    return "send_subproblems", [sender, get_amount], self.prc_blnc
                 elif subs_amount < get_amount:
-                    return "send_subs", [sender, subs_amount], self.prc_blnc
-            return "send_subs", [-1, -1], self.prc_blnc
-        elif state == "received" or state == "received_put_subs_and_rec":
+                    return "send_subproblems", [sender, subs_amount], self.prc_blnc
+            return "send_subproblems", [-1, -1], self.prc_blnc
+        elif state == "received" or state == "received_subproblems":
             self.state = "receive"
             return "receive", [], self.prc_blnc
-        elif state == "sent_subs" or state == "sent_get_request" or state == "sent_exit":
+        elif state == "sent_subproblems" or state == "sent_get_request" or state == "sent_exit_command":
             if self.alive_proc_am == 0:
                 self.state = "exit"
                 return "exit", [], self.prc_blnc
@@ -65,7 +65,7 @@ class SlaveBalancer(sb.SimpleBalancer):
                 else:
                     self.state = "receive"
                     return "receive", [], self.prc_blnc
-        elif state == "received_put_subs_and_rec":
+        elif state == "received_subproblems":
             if isinstance(add_args, list) and len(add_args) == 3\
                     and isinstance(add_args[1], list) and isinstance(add_args[2], int):
                 proc_ind = add_args[2]
@@ -74,7 +74,7 @@ class SlaveBalancer(sb.SimpleBalancer):
         elif self.state == "solved":
             if subs_amount > 0:
                 if subs_amount > self.S:
-                    return "send_subs", [0, self.S], self.prc_blnc
+                    return "send_subproblems", [0, self.S], self.prc_blnc
                 else:
                     return "solve", [self.T], self.prc_blnc
             else:

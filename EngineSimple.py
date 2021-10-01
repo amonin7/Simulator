@@ -117,8 +117,8 @@ class Engine:
                                                     state=receive_status,
                                                     subs_amount=self.solvers[proc_ind].get_sub_amount(),
                                                     add_args=[outputs, self.isSentRequest, proc_ind])
-                    if command == "send_subs":
-                        self.state[proc_ind] = self.send_subs(proc_id=proc_ind, subs_am=outputs[1], dest_id=outputs[0])
+                    if command == "send_subproblems":
+                        self.state[proc_ind] = self.send_subproblems(proc_id=proc_ind, subs_am=outputs[1], dest_id=outputs[0])
                     elif command == "send_get_request":
                         self.state[proc_ind] = self.send_get_request(dest_proc_id=outputs[0],
                                                                      sender_proc_id=proc_ind,
@@ -130,8 +130,8 @@ class Engine:
                         self.state[proc_ind] = self.solve(proc_id=proc_ind, tasks_amount=tasks_am)
                 else:
                     self.isDoneStatuses[proc_ind] = True
-            elif command == "send_subs":
-                self.state[proc_ind] = self.send_subs(proc_id=proc_ind, subs_am=outputs[1], dest_id=outputs[0])
+            elif command == "send_subproblems":
+                self.state[proc_ind] = self.send_subproblems(proc_id=proc_ind, subs_am=outputs[1], dest_id=outputs[0])
             elif command == "send_all":
                 self.state[proc_ind] = self.send_all_subs_to_all_proc(proc_id=proc_ind)
             elif command == "send_get_request":
@@ -200,7 +200,7 @@ class Engine:
                 return "received_get_request", [message.payload, message.sender]
             elif message.mes_type == "subproblems":
                 self.solvers[proc_id].putSubproblems(message.payload)
-                return "received_put_subs_and_rec", []
+                return "received_subproblems", []
             elif message.mes_type == "exit_command":
                 return "received_exit_command", []
 
@@ -250,7 +250,7 @@ class Engine:
         # command, outputs = self.balance(sender_proc_id, state)
         return "sent_get_request"
 
-    def send_subs(self, proc_id, subs_am, dest_id):
+    def send_subproblems(self, proc_id, subs_am, dest_id):
         message = sm.Message2(sender=proc_id,
                               dest=dest_id,
                               mes_type="subproblems",
@@ -264,7 +264,7 @@ class Engine:
         if state != "sent":
             raise Exception('Sending went wrong')
         self.save_time(proc_id=proc_id, timestamp=time, dest_proc=dest_id)
-        return "sent_subs"
+        return "sent_subproblems"
 
     def send_exit(self, proc_id, dest_id):
         state, _, time = self.communicators[proc_id].send(
@@ -279,7 +279,7 @@ class Engine:
         if state != "sent":
             raise Exception('Sending went wrong')
         self.save_time(proc_id=proc_id, timestamp=time, dest_proc=proc_id)
-        return "sent_exit"
+        return "sent_exit_command"
 
     def send_all_subs_to_all_proc(self, proc_id):
         probs = self.solvers[proc_id].getSubproblems(-1)
@@ -299,7 +299,7 @@ class Engine:
                 ms=self.mes_service
             )
             self.save_time(proc_id=proc_id, timestamp=time, dest_proc=dest_proc)
-        return "sent_subs"
+        return "sent_subproblems"
 
     def send(self, proc_id, messages_to_send):
         is_sent = True

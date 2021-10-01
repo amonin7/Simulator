@@ -37,7 +37,7 @@ class MasterBalancer(SimpleBalancer):
             return "solve", [self.proc_am * self.arg], self.prc_blnc
         if self.state == "solved":
             return "send_all", [[-1], [-1]], self.prc_blnc
-        if self.state == "sent_subs":
+        if self.state == "sent_subproblems":
             return "exit", [], self.prc_blnc
 
 
@@ -50,7 +50,7 @@ class SlaveBalancer(SimpleBalancer):
         self.state = state
         if self.state == "starting":
             return "receive", [], self.prc_blnc
-        elif self.state == "received_put_subs_and_rec":
+        elif self.state == "received_subproblems":
             return "solve", [-1], self.prc_blnc
         elif self.state == "solved":
             return "exit", [], self.prc_blnc
