@@ -53,10 +53,10 @@ class Engine:
                                    ,
                                    alive_proc_am=self.processes_amount - 1
                                    ,
-                                   T=self.max_depth,
-                                   S=self.max_depth // 2,
+                                   T=200,
+                                   S=10,
                                    m=100,
-                                   M=1000
+                                   M=150
                                    ,
                                    arg=self.arg
                                    )
@@ -84,10 +84,10 @@ class Engine:
                                      ,
                                      alive_proc_am=self.processes_amount - 1
                                      ,
-                                     T=self.max_depth,
-                                     S=self.max_depth // 2,
+                                     T=200,
+                                     S=10,
                                      m=100,
-                                     M=1000
+                                     M=150
                                      ,
                                      arg=self.arg
                                      )

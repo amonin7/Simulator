@@ -53,8 +53,8 @@ class Engine:
                                    ,
                                    alive_proc_am=self.processes_amount - 1
                                    ,
-                                   T=self.max_depth,
-                                   S=self.max_depth // 2,
+                                   T=200,
+                                   S=10,
                                    m=100,
                                    M=1000
                                    ,
@@ -84,8 +84,8 @@ class Engine:
                                      ,
                                      alive_proc_am=self.processes_amount - 1
                                      ,
-                                     T=self.max_depth,
-                                     S=self.max_depth // 2,
+                                     T=200,
+                                     S=10,
                                      m=100,
                                      M=1000
                                      ,
@@ -107,10 +107,13 @@ class Engine:
         proc_ind = 0
         while True:
             state = self.state[proc_ind]
-            command, outputs = self.balance(proc_ind,
-                                            state=state,
-                                            subs_amount=self.solvers[proc_ind].get_sub_amount(),
-                                            add_args=[[], self.isSentRequest, proc_ind])
+            if state == "receiving":
+                command = "receive"
+            else:
+                command, outputs = self.balance(proc_ind,
+                                                state=state,
+                                                subs_amount=self.solvers[proc_ind].get_sub_amount(),
+                                                add_args=[[], self.isSentRequest, proc_ind])
             if command == "start" or command == "receive":
                 receive_status, outputs = self.receive_message(proc_id=proc_ind)
                 if receive_status != "received_exit_command":
@@ -119,7 +122,8 @@ class Engine:
                                                     subs_amount=self.solvers[proc_ind].get_sub_amount(),
                                                     add_args=[outputs, self.isSentRequest, proc_ind])
                     if command == "send_subproblems":
-                        self.state[proc_ind] = self.send_subproblems(proc_id=proc_ind, subs_am=outputs[1], dest_id=outputs[0])
+                        self.state[proc_ind] = self.send_subproblems(proc_id=proc_ind, subs_am=outputs[1],
+                                                                     dest_id=outputs[0])
                     elif command == "send_get_request":
                         self.state[proc_ind] = self.send_get_request(dest_proc_id=outputs[0],
                                                                      sender_proc_id=proc_ind,
@@ -129,6 +133,10 @@ class Engine:
                     elif command == "solve":
                         tasks_am = outputs[0]
                         self.state[proc_ind] = self.solve(proc_id=proc_ind, tasks_amount=tasks_am)
+                    elif command == "receive":
+                        self.state[proc_ind] = "receiving"
+                    else:
+                        raise Exception(f"wrong command={command}")
                 else:
                     self.isDoneStatuses[proc_ind] = True
             elif command == "send_subproblems":
@@ -226,6 +234,8 @@ class Engine:
         command, outputs, time = self.balancers[proc_id].balance(state=state,
                                                                  subs_amount=subs_amount,
                                                                  add_args=add_args)
+        if state == "nothing_to_receive" and command == "receive":
+            return command, outputs
         self.route_collector.write(proc_id,
                                    str(round(self.timers[proc_id], 3)) + '-' + str(
                                        round(self.timers[proc_id] + time, 3)),
