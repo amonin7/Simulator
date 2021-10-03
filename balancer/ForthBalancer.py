@@ -1,3 +1,5 @@
+from queue import Queue
+
 import balancer.SimpleBalancer as sb
 
 
