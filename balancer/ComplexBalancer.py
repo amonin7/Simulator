@@ -4,19 +4,13 @@ import balancer.SimpleBalancer as sb
 
 
 class MasterBalancer(sb.SimpleBalancer):
-    def __init__(self, state, max_depth, proc_am, prc_blnc, alive_proc_am=0, T=0, S=10, m=50, M=100, arg=10):
+    def __init__(self, state, max_depth, proc_am, prc_blnc, T=0, S=10, m=50, M=100, arg=10):
         super().__init__(state, max_depth, proc_am, prc_blnc)
-        if alive_proc_am == 0:
-            self.alive_proc_am = proc_am - 1
-        else:
-            self.alive_proc_am = alive_proc_am
         self.T = T
         self.S = S
         self.M = M
         self.m = m
         self.arg = arg
-        self.last_t = T
-        self.s_am = []
         self.cur_S = S
         self.poor_proc = Queue()
 
@@ -45,7 +39,6 @@ class MasterBalancer(sb.SimpleBalancer):
                 raise Exception(f"Wrong args list format: {add_args}")
         elif state == "received_subproblems":
             sender = add_args[0][1]
-            self.s_am.append(subs_amount)
             if subs_amount < self.m:
                 self.cur_S = self.S
             elif subs_amount > self.M:
@@ -85,7 +78,7 @@ class SlaveBalancer(sb.SimpleBalancer):
                 if not isSentGR:
                     return "send_get_request", [0, 1]
                 else:
-                    raise Exception(f"Double needance of sending GR")
+                    raise Exception(f"Double needance of sending GR, add_args={add_args}")
             else:
                 raise Exception(f"Wrong args list format: {add_args}")
         elif state == "received_subproblems" or self.state == 'received_S':

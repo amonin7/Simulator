@@ -52,7 +52,7 @@ class SimpleSolver:
     # функция выдающая с вероятностью р '1' и 1-р '0'
     # вероятность р = (текущая глубина дерева) / (макс глубину дерева)
     def generateContinueOrNot(self, subProblem):
-        p = (float(subProblem.depth) / float(self.max_depth)) ** 5
+        p = (float(subProblem.depth) / float(self.max_depth)) ** 4.25
         return random.choices([0, 1], weights=[p, 1 - p])[0]
 
     # непосредственное ветвление одной вершины

@@ -21,4 +21,3 @@ class TraceCollector:
     def save(self):
         df = pd.DataFrame.from_dict(self.frame, orient='index').transpose()
         df.to_csv(os.getcwd() + "/" + self.filename)
-        print("done")
