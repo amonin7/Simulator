@@ -68,7 +68,8 @@ class Engine:
         self.communicators = [com.SimpleCommunicator("ready",
                                                      proc_id=0,
                                                      proc_am=self.processes_amount,
-                                                     prc_rcv=self.price_rcv,
+                                                     prc_rcv1=0.0033543942799634805,
+                                                     prc_rcv2=-1.51795035e-05,
                                                      prc_snd=self.price_snd)]
         self.timers = [0.0] * self.processes_amount
         self.downtime = [0.0] * self.processes_amount
@@ -96,7 +97,8 @@ class Engine:
             self.solvers.append(solver)
 
             communicator = com.SimpleCommunicator("ready", proc_id=i, proc_am=self.processes_amount,
-                                                  prc_rcv=self.price_rcv,
+                                                  prc_rcv1=0.0033543942799634805,
+                                                  prc_rcv2=-1.51795035e-05,
                                                   prc_snd=self.price_snd)
             self.communicators.append(communicator)
 
@@ -163,6 +165,8 @@ class Engine:
                 self.state[proc_ind] = state
             elif command == "exit":
                 self.isDoneStatuses[proc_ind] = True
+                if proc_ind == 0:
+                    print(self.route_collector.frame['timestamp0'][-1])
                 # break
             elif command == "send_all_exit_command":
                 while not outputs[0].empty():
@@ -332,108 +336,6 @@ class Engine:
             self.save_time(proc_id=proc_id, timestamp=time, dest_proc=dest_proc)
         return "sent_subproblems"
 
-    def send(self, proc_id, messages_to_send):
-        is_sent = True
-        """
-        outputs[0] -- is the list of numbers of processes, where we will send subproblems
-
-        outputs[1] -- is the list of amounts of subproblems, which we will send to other processes
-        """
-        if len(messages_to_send) == 2:
-            if len(messages_to_send[0]) >= 1 and messages_to_send[0][0] == -1:
-                if len(messages_to_send[1]) >= 1 and messages_to_send[1][0] == -1:
-                    probs = self.solvers[proc_id].getSubproblems(-1)
-                    probs_amnt = len(probs)
-                    part = 1 / (self.processes_amount - 1)
-                    for dest_proc in range(1, self.processes_amount):
-                        message_list = probs[
-                                       int((dest_proc - 1) * probs_amnt * part): int(dest_proc * probs_amnt * part)]
-                        message = sm.Message2(sender=proc_id,
-                                              dest=dest_proc,
-                                              mes_type="subproblems",
-                                              payload=message_list,
-                                              timestamp=self.timers[proc_id])
-                        state, outputs, time = self.communicators[proc_id].send(
-                            receiver=dest_proc,
-                            message=message,
-                            ms=self.mes_service
-                        )
-                        is_sent = is_sent and (state == 'sent')
-                        self.save_time(proc_id=proc_id, timestamp=time, dest_proc=dest_proc)
-                elif len(messages_to_send[1]) == 1:
-                    send_amount = messages_to_send[1][0]
-                    for dest_proc in range(1, self.processes_amount):
-                        probs_to_send = self.solvers[proc_id].getSubproblems(send_amount)
-                        if len(probs_to_send) == 0 and dest_proc == 1:
-                            raise Exception('There is nothing to send')
-                        elif len(probs_to_send) == 0:
-                            break
-                        else:
-                            message_list = probs_to_send
-                            message = sm.Message2(sender=proc_id,
-                                                  dest=dest_proc,
-                                                  mes_type="subproblems",
-                                                  payload=message_list,
-                                                  timestamp=self.timers[proc_id])
-                            state, outputs, time = self.communicators[proc_id].send(
-                                receiver=dest_proc,
-                                message=message,
-                                ms=self.mes_service
-                            )
-                            is_sent = is_sent and (state == 'sent')
-                            self.save_time(proc_id=proc_id, timestamp=time, dest_proc=dest_proc)
-                elif len(messages_to_send[1]) != 1:
-                    raise Exception('Unexpected arguments are passes to send function')
-            elif len(messages_to_send[1]) == len(messages_to_send[0]):
-                probs = self.solvers[proc_id].getSubproblems(np.sum(messages_to_send[1]))
-                for com_id in messages_to_send[0]:
-                    list_to_put = []
-                    for dest_proc in range(messages_to_send[1][com_id]):
-                        list_to_put.append(probs.pop())
-                    message_list = list_to_put
-                    message = sm.Message2(sender=proc_id,
-                                          dest=com_id,
-                                          mes_type="subproblems",
-                                          payload=message_list,
-                                          timestamp=self.timers[proc_id])
-                    state, outputs, time = self.communicators[proc_id].send(
-                        receiver=com_id,
-                        message=message,
-                        ms=self.mes_service
-                    )
-                    is_sent = is_sent and (state == 'sent')
-                    self.save_time(proc_id=proc_id, timestamp=time, dest_proc=com_id)
-                if len(probs) > 0:
-                    self.solvers[0].putSubproblems(probs)
-            elif len(messages_to_send[1]) >= 1 and messages_to_send[1][0] == -1 and len(messages_to_send[0]) >= 1:
-                probs = self.solvers[-1].getSubproblems(-1)
-                probs_amnt = len(probs)
-                part = 1 / len(messages_to_send[0])
-                for dest_proc in messages_to_send[0]:
-                    message_list = probs[int((dest_proc - 1) * probs_amnt * part): int(dest_proc * probs_amnt * part)]
-                    message = sm.Message2(sender=proc_id,
-                                          dest=dest_proc,
-                                          mes_type="subproblems",
-                                          payload=message_list,
-                                          timestamp=self.timers[proc_id])
-                    state, outputs, time = self.communicators[proc_id].send(
-                        receiver=dest_proc,
-                        message=message,
-                        ms=self.mes_service
-                    )
-                    is_sent = is_sent and (state == 'sent')
-                    self.save_time(proc_id=proc_id, timestamp=time, dest_proc=dest_proc)
-
-        if not is_sent:
-            raise Exception('Sending went wrong')
-        else:
-            state = "sent"
-
-        command, outputs = self.balance(proc_id, state,
-                                        subs_amount=self.solvers[proc_id].get_sub_amount(),
-                                        add_args=[[], self.isSentRequest, proc_id])
-        return command, outputs
-
     def save_time(self, proc_id, timestamp, dest_proc):
         self.route_collector.write(proc_id,
                                    str(round(self.timers[proc_id], 7)) + '%' + str(
@@ -460,5 +362,5 @@ class Engine:
 
 if __name__ == "__main__":
     # proc_am = [10, 50, 100, 200, 500, 1000]
-    eng = Engine(proc_amount=10, max_depth=20)
+    eng = Engine(proc_amount=10, max_depth=15)
     eng.run()

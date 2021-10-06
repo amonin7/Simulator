@@ -16,6 +16,22 @@ class Message2:
         self.mes_type = mes_type
         self.timestamp = timestamp
 
+    def __str__(self) -> str:
+        return str(
+            {
+                'payload': self.payload,
+                'message_type': self.mes_type
+            }
+        )
+
+    def __repr__(self) -> str:
+        return str(
+            {
+                'payload': self.payload,
+                'message_type': self.mes_type
+            }
+        )
+
     def __eq__(self, other):
         return self.timestamp == other.timestamp
 
