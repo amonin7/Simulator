@@ -1,12 +1,13 @@
 class SimpleCommunicator:
 
-    def __init__(self, state, proc_id, proc_am, prc_snd=0, prc_rcv1=0, prc_rcv2=0):
+    def __init__(self, state, proc_id, proc_am, prc_snd0=0, prc_snd1=0, prc_rcv0=0, prc_rcv1=0):
         self._state = state
         self.proc_id = proc_id
         self.proc_am = proc_am
-        self.prc_snd = prc_snd
+        self.prc_snd0 = prc_snd0
+        self.prc_snd1 = prc_snd1
+        self.prc_rcv0 = prc_rcv0
         self.prc_rcv1 = prc_rcv1
-        self.prc_rcv2 = prc_rcv2
 
     @property
     def state(self):
@@ -17,13 +18,13 @@ class SimpleCommunicator:
         self._state = value
 
     def send(self, receiver, message, ms):
-        time = self.prc_snd
+        time = self.prc_snd0 + self.prc_snd1 * len(str(message))
         ms.put_message(receiver, message)
         return "sent", [], time
 
     def receive(self, receiver, ms):
         message = ms.get_messages(receiver)
-        time = self.prc_rcv1 + self.prc_rcv2 * len(str(message))
+        time = self.prc_rcv0 + self.prc_rcv1 * len(str(message))
         if len(message) != 0:
             return "put_messages", message, time
         else:
@@ -31,7 +32,7 @@ class SimpleCommunicator:
 
     def receive_one(self, receiver, ms):
         message = ms.get_one_message(receiver)
-        time = self.prc_rcv1 + self.prc_rcv2 * len(str(message))
+        time = self.prc_rcv0 + self.prc_rcv1 * len(str(message))
         if message is not None:
             return "put_message", message, time
         else:

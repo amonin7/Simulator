@@ -19,13 +19,17 @@ class Engine:
                  price_get=0.0,
                  price_solve=0.0000378,
                  price_balance=0.0000235,
-                 price_receive=0.0001550,
-                 price_send=0.0000043):
+                 price_receive0=0.0001550,
+                 price_receive1=0.0001550,
+                 price_send0=0.0000043,
+                 price_send1=0.0000043):
         self.arg = arg
         self.processes_amount = proc_amount  # amount of simulated processes
         self.max_depth = max_depth  # max depth of solving tree
-        self.price_rcv = price_receive  # price of receiving message
-        self.price_snd = price_send  # price of sending message
+        self.price_rcv0 = price_receive0  # price of receiving message
+        self.price_rcv1 = price_receive1  # price of receiving message
+        self.price_snd0 = price_send0  # price of sending message
+        self.price_snd1 = price_send1  # price of sending message
         self.price_put = price_put  # price of putting message into solver
         self.price_get = price_get  # price of getting message from solver
         self.price_blc = price_balance  # price of balancing
@@ -68,9 +72,11 @@ class Engine:
         self.communicators = [com.SimpleCommunicator("ready",
                                                      proc_id=0,
                                                      proc_am=self.processes_amount,
-                                                     prc_rcv1=0.0033543942799634805,
-                                                     prc_rcv2=-1.51795035e-05,
-                                                     prc_snd=self.price_snd)]
+                                                     prc_rcv0=0.0033543942799634805,
+                                                     prc_rcv1=-1.51795035e-05,
+                                                     prc_snd0=self.price_snd0,
+                                                     prc_snd1=self.price_snd1
+                                                     )]
         self.timers = [0.0] * self.processes_amount
         self.downtime = [0.0] * self.processes_amount
         self.isDoneStatuses = [False] * self.processes_amount
@@ -97,9 +103,10 @@ class Engine:
             self.solvers.append(solver)
 
             communicator = com.SimpleCommunicator("ready", proc_id=i, proc_am=self.processes_amount,
-                                                  prc_rcv1=0.0033543942799634805,
-                                                  prc_rcv2=-1.51795035e-05,
-                                                  prc_snd=self.price_snd)
+                                                  prc_rcv0=0.0033543942799634805,
+                                                  prc_rcv1=-1.51795035e-05,
+                                                  prc_snd0=self.price_snd0,
+                                                  prc_snd1=self.price_snd1)
             self.communicators.append(communicator)
 
     def run(self) -> None:
@@ -195,12 +202,6 @@ class Engine:
         print(f"subs_am={self.solved}")
         self.route_collector.save()
         self.comm_collector.save()
-
-    def start(self, proc_id, state):
-        rcv_output = self.receive_message(proc_id=proc_id)
-        command, outputs = self.balance(proc_id, state, subs_amount=self.solvers[proc_id].get_sub_amount(),
-                                        add_args=[[], self.isSentRequest, proc_id])
-        return command, outputs
 
     def receive_message(self, proc_id):
         command, message, time_for_rcv = self.communicators[proc_id].receive_one(proc_id, self.mes_service)
@@ -336,14 +337,6 @@ class Engine:
             self.save_time(proc_id=proc_id, timestamp=time, dest_proc=dest_proc)
         return "sent_subproblems"
 
-    def save_time(self, proc_id, timestamp, dest_proc):
-        self.route_collector.write(proc_id,
-                                   str(round(self.timers[proc_id], 7)) + '%' + str(
-                                       round(self.timers[proc_id] + timestamp, 7)),
-                                   'Send',
-                                   'dest=' + str(dest_proc))
-        self.timers[proc_id] += timestamp
-
     def send_S(self, proc_id, s, sender):
         state, _, time = self.communicators[proc_id].send(
             receiver=sender,
@@ -358,6 +351,14 @@ class Engine:
             raise Exception('Sending went wrong')
         self.save_time(proc_id=proc_id, timestamp=time, dest_proc=proc_id)
         return "sent_S"
+
+    def save_time(self, proc_id, timestamp, dest_proc):
+        self.route_collector.write(proc_id,
+                                   str(round(self.timers[proc_id], 7)) + '%' + str(
+                                       round(self.timers[proc_id] + timestamp, 7)),
+                                   'Send',
+                                   'dest=' + str(dest_proc))
+        self.timers[proc_id] += timestamp
 
 
 if __name__ == "__main__":
