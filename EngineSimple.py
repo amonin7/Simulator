@@ -34,8 +34,8 @@ class Engine:
         self.price_slv = price_solve  # price of solving
 
         self.mes_service = ms.MessageService()
-        self.route_collector = rc.TraceCollector('Trac.csv', self.processes_amount)
-        self.comm_collector = cc.CommunicationCollector('Communicatio.csv')
+        self.route_collector = rc.TraceCollector('TraceS.csv', self.processes_amount)
+        self.comm_collector = cc.CommunicationCollector('CommunicationS.csv')
         self.balancers = []
         self.solvers = []
         self.communicators = []
@@ -70,9 +70,7 @@ class Engine:
                                          prc_slv=self.price_slv)]
         self.communicators = [com.SimpleCommunicator("ready",
                                                      proc_id=0,
-                                                     proc_am=self.processes_amount,
-                                                     prc_rcv=self.price_rcv,
-                                                     prc_snd=self.price_snd)]
+                                                     proc_am=self.processes_amount)]
         self.timers = [0.0] * self.processes_amount
         self.downtime = [0.0] * self.processes_amount
         self.isDoneStatuses = [False] * self.processes_amount
@@ -96,9 +94,7 @@ class Engine:
                                       prc_put=self.price_put, prc_slv=self.price_slv)
             self.solvers.append(solver)
 
-            communicator = com.SimpleCommunicator("ready", proc_id=i, proc_am=self.processes_amount,
-                                                  prc_rcv=self.price_rcv,
-                                                  prc_snd=self.price_snd)
+            communicator = com.SimpleCommunicator("ready", proc_id=i, proc_am=self.processes_amount)
             self.communicators.append(communicator)
 
     def run(self) -> None:
@@ -180,18 +176,18 @@ class Engine:
         if command == "put_message":
             if self.timers[proc_id] < message.timestamp:
                 self.route_collector.write(proc_id,
-                                           f"{round(self.timers[proc_id], 7):.7f}-{round(message.timestamp, 7):.7f}",
+                                           f"{round(self.timers[proc_id], 7):.7f}%{round(message.timestamp, 7):.7f}",
                                            'Await for receive',
                                            '-')
                 self.route_collector.write(proc_id,
-                                           f"{round(message.timestamp, 7):.7f}-{round(message.timestamp + time_for_rcv, 7):.7f}",
+                                           f"{round(message.timestamp, 7):.7f}%{round(message.timestamp + time_for_rcv, 7):.7f}",
                                            'Receive',
                                            message.mes_type)
                 self.downtime[proc_id] += message.timestamp - self.timers[proc_id]
                 self.timers[proc_id] = message.timestamp + time_for_rcv
             else:
                 self.route_collector.write(proc_id,
-                                           f"{round(self.timers[proc_id], 7):.7f}-{round(self.timers[proc_id] + time_for_rcv, 7):.7f}",
+                                           f"{round(self.timers[proc_id], 7):.7f}%{round(self.timers[proc_id] + time_for_rcv, 7):.7f}",
                                            'Receive',
                                            message.mes_type)
                 self.timers[proc_id] += time_for_rcv
@@ -214,7 +210,7 @@ class Engine:
         if state == "solved":
             # command = "balance"
             self.route_collector.write(proc_id,
-                                       f"{round(self.timers[proc_id], 7):.7f}-{round(self.timers[proc_id] + time, 7):.7f}",
+                                       f"{round(self.timers[proc_id], 7):.7f}%{round(self.timers[proc_id] + time, 7):.7f}",
                                        'Solve',
                                        'tasks_am=' + str(tasks_amount))
             self.timers[proc_id] += time
@@ -227,7 +223,7 @@ class Engine:
                                                                  subs_amount=subs_amount,
                                                                  add_args=add_args)
         self.route_collector.write(proc_id,
-                                   f"{round(self.timers[proc_id], 7):.7f}-{round(self.timers[proc_id] + time, 7):.7f}",
+                                   f"{round(self.timers[proc_id], 7):.7f}%{round(self.timers[proc_id] + time, 7):.7f}",
                                    'Balance',
                                    'state=' + state)
         self.timers[proc_id] += time
@@ -405,7 +401,7 @@ class Engine:
 
     def save_time(self, proc_id, timestamp, dest_proc):
         self.route_collector.write(proc_id,
-                                   f"{round(self.timers[proc_id], 7):.7f}-{round(self.timers[proc_id] + timestamp, 7):.7f}",
+                                   f"{round(self.timers[proc_id], 7):.7f}%{round(self.timers[proc_id] + timestamp, 7):.7f}",
                                    'Send',
                                    'dest=' + str(dest_proc))
         self.timers[proc_id] += timestamp
@@ -413,5 +409,5 @@ class Engine:
 
 if __name__ == "__main__":
     # proc_am = [10, 50, 100, 200, 500, 1000]
-    eng = Engine(proc_amount=10, max_depth=20)
+    eng = Engine(proc_amount=10, max_depth=24)
     eng.run()
