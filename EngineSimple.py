@@ -409,5 +409,5 @@ class Engine:
 
 if __name__ == "__main__":
     # proc_am = [10, 50, 100, 200, 500, 1000]
-    eng = Engine(proc_amount=10, max_depth=24)
+    eng = Engine(proc_amount=10, max_depth=28)
     eng.run()
