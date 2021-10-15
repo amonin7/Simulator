@@ -19,7 +19,7 @@ class Engine:
                  arg=7,
                  price_put=0.0,
                  price_get=0.0,
-                 price_solve=0.0000488,
+                 price_solve=0.0000639,
                  price_balance=0.0000158,
                  price_receive=0.0003929,
                  price_send=0.0000005):
@@ -158,6 +158,14 @@ class Engine:
                 proc_ind = (proc_ind + 1) % self.processes_amount
             if i > self.processes_amount + 1:
                 break
+
+        max_time = 0.0
+        for i in range(self.processes_amount):
+            cur_time = float(self.route_collector.frame[f'timestamp{i}'][-1].split('%')[1])
+            if max_time < cur_time:
+                max_time = cur_time
+        with open('argtime.csv', 'a') as f:
+            f.write(f'\n{max_time},{self.arg}')
 
         print(f"subs_am={self.subs_am}")
         self.route_collector.save()
@@ -409,5 +417,5 @@ class Engine:
 
 if __name__ == "__main__":
     # proc_am = [10, 50, 100, 200, 500, 1000]
-    eng = Engine(proc_amount=10, max_depth=28)
+    eng = Engine(proc_amount=10, max_depth=24)
     eng.run()
