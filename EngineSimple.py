@@ -22,12 +22,14 @@ class Engine:
                  price_solve=0.0000639,
                  price_balance=0.0000158,
                  price_receive=0.0003929,
-                 price_send=0.0000005):
+                 price_send0=-0.0004077014276206508,
+                 price_send1=7.11110464e-06):
         self.arg = arg
         self.processes_amount = proc_amount  # amount of simulated processes
         self.max_depth = max_depth  # max depth of solving tree
         self.price_rcv = price_receive  # price of receiving message
-        self.price_snd = price_send  # price of sending message
+        self.price_snd0 = price_send0  # price of sending message
+        self.price_snd1 = price_send1  # price of sending message
         self.price_put = price_put  # price of putting message into solver
         self.price_get = price_get  # price of getting message from solver
         self.price_blc = price_balance  # price of balancing
@@ -50,15 +52,7 @@ class Engine:
     def initializeAll(self) -> None:
         master = sb.MasterBalancer("start", max_depth=self.max_depth,
                                    proc_am=self.processes_amount,
-                                   prc_blnc=self.price_blc
-                                   # ,
-                                   # alive_proc_am=self.processes_amount - 1
-                                   # ,
-                                   # T=self.max_depth,
-                                   # S=self.max_depth // 2,
-                                   # m=100,
-                                   # M=1000
-                                   ,
+                                   prc_blnc=self.price_blc,
                                    arg=self.arg
                                    )
         self.balancers = [master]
@@ -70,7 +64,9 @@ class Engine:
                                          prc_slv=self.price_slv)]
         self.communicators = [com.SimpleCommunicator("ready",
                                                      proc_id=0,
-                                                     proc_am=self.processes_amount)]
+                                                     proc_am=self.processes_amount,
+                                                     prc_snd0=self.price_snd0,
+                                                     prc_snd1=self.price_snd1)]
         self.timers = [0.0] * self.processes_amount
         self.downtime = [0.0] * self.processes_amount
         self.isDoneStatuses = [False] * self.processes_amount
@@ -79,13 +75,7 @@ class Engine:
 
         for i in range(1, self.processes_amount):
             slave = sb.SlaveBalancer("start", max_depth=self.max_depth, proc_am=self.processes_amount,
-                                     prc_blnc=self.price_blc
-                                     # ,
-                                     # T=self.max_depth,
-                                     # S=self.max_depth // 2,
-                                     # m=100,
-                                     # M=1000
-                                     ,
+                                     prc_blnc=self.price_blc,
                                      arg=self.arg
                                      )
             self.balancers.append(slave)
@@ -94,7 +84,8 @@ class Engine:
                                       prc_put=self.price_put, prc_slv=self.price_slv)
             self.solvers.append(solver)
 
-            communicator = com.SimpleCommunicator("ready", proc_id=i, proc_am=self.processes_amount)
+            communicator = com.SimpleCommunicator("ready", proc_id=i, proc_am=self.processes_amount,
+                                                  prc_snd0=self.price_snd0, prc_snd1=self.price_snd1)
             self.communicators.append(communicator)
 
     def run(self) -> None:
@@ -144,11 +135,6 @@ class Engine:
                 self.isDoneStatuses[proc_ind] = True
                 # break
 
-            # TODO: добавить в метод balance параметром состояние солвера (эм_таскс + рекорд)
-
-            # TODO: comp record
-            # if command == "stop" and self.solvers[proc_ind].compareRecord(optimal_value):
-            #     optimal_value = self.solvers[proc_ind].getRecord()
             proc_ind = (proc_ind + 1) % self.processes_amount
             i = 0
             while self.isDoneStatuses[proc_ind]:
@@ -249,9 +235,7 @@ class Engine:
         )
         if state != "sent":
             raise Exception('Sending went wrong')
-        # self.isSentRequest[sender_proc_id] = True
         self.save_time(proc_id=sender_proc_id, timestamp=time, dest_proc=dest_proc_id)
-        # command, outputs = self.balance(sender_proc_id, state)
         return "sent_get_request"
 
     def send_subproblems(self, proc_id, subs_am, dest_id):
@@ -416,6 +400,5 @@ class Engine:
 
 
 if __name__ == "__main__":
-    # proc_am = [10, 50, 100, 200, 500, 1000]
-    eng = Engine(proc_amount=10, max_depth=24)
+    eng = Engine(proc_amount=10, max_depth=24, arg=91)
     eng.run()

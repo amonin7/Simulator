@@ -19,10 +19,10 @@ class Engine:
                  price_get=0.0,
                  price_solve=0.0000378,
                  price_balance=0.0000235,
-                 price_receive0=0.0001550,
-                 price_receive1=0.0001550,
-                 price_send0=0.0000043,
-                 price_send1=0.0000043):
+                 price_receive0=0.000607,
+                 price_receive1=0.00005050,
+                 price_send0=-0.00017073992524408154,
+                 price_send1=7.11110464e-06):
         self.arg = arg
         self.processes_amount = proc_amount  # amount of simulated processes
         self.max_depth = max_depth  # max depth of solving tree
@@ -72,8 +72,8 @@ class Engine:
         self.communicators = [com.SimpleCommunicator("ready",
                                                      proc_id=0,
                                                      proc_am=self.processes_amount,
-                                                     prc_rcv0=0.0033543942799634805,
-                                                     prc_rcv1=-1.51795035e-05,
+                                                     prc_rcv0=self.price_rcv0,
+                                                     prc_rcv1=self.price_rcv1,
                                                      prc_snd0=self.price_snd0,
                                                      prc_snd1=self.price_snd1
                                                      )]
@@ -103,8 +103,8 @@ class Engine:
             self.solvers.append(solver)
 
             communicator = com.SimpleCommunicator("ready", proc_id=i, proc_am=self.processes_amount,
-                                                  prc_rcv0=0.0033543942799634805,
-                                                  prc_rcv1=-1.51795035e-05,
+                                                  prc_rcv0=self.price_rcv0,
+                                                  prc_rcv1=self.price_rcv1,
                                                   prc_snd0=self.price_snd0,
                                                   prc_snd1=self.price_snd1)
             self.communicators.append(communicator)
@@ -199,9 +199,10 @@ class Engine:
             if i > self.processes_amount + 1:
                 break
 
+        print(f"max_time={float(self.route_collector.frame['timestamp0'][-1].split('%')[1])}")
         print(f"subs_am={self.solved}")
-        self.route_collector.save()
-        self.comm_collector.save()
+        # self.route_collector.save()
+        # self.comm_collector.save()
 
     def receive_message(self, proc_id):
         command, message, time_for_rcv = self.communicators[proc_id].receive_one(proc_id, self.mes_service)
@@ -281,9 +282,7 @@ class Engine:
         )
         if state != "sent":
             raise Exception('Sending went wrong')
-        # self.isSentRequest[sender_proc_id] = True
         self.save_time(proc_id=sender_proc_id, timestamp=time, dest_proc=dest_proc_id)
-        # command, outputs = self.balance(sender_proc_id, state)
         return "sent_get_request"
 
     def send_subproblems(self, proc_id, subs_am, dest_id):
@@ -362,6 +361,5 @@ class Engine:
 
 
 if __name__ == "__main__":
-    # proc_am = [10, 50, 100, 200, 500, 1000]
     eng = Engine(proc_amount=10, max_depth=24)
     eng.run()
