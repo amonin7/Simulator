@@ -1,5 +1,3 @@
-# import balancer.ThirdBalancer as sb
-# import balancer.SecondBalancer as sb
 import balancer.SimpleBalancer as sb
 import subproblems.SimpleSubproblem as sp
 import solver.SimpleSolver as slv
@@ -120,7 +118,7 @@ class Engine:
             elif command == "send_subproblems":
                 self.state[proc_ind] = self.send_subproblems(proc_id=proc_ind, subs_am=outputs[1], dest_id=outputs[0])
             elif command == "send_all":
-                self.state[proc_ind] = self.send_all_subs_to_all_proc(proc_id=proc_ind)
+                self.state[proc_ind] = self.send_all_subs_to_all_proc_rr(proc_id=proc_ind)
             elif command == "send_get_request":
                 self.state[proc_ind] = self.send_get_request(dest_proc_id=outputs[0],
                                                              sender_proc_id=proc_ind,
@@ -280,6 +278,38 @@ class Engine:
                                   dest=dest_proc,
                                   mes_type="subproblems",
                                   payload=message_list,
+                                  timestamp=self.timers[proc_id])
+            state, outputs, time = self.communicators[proc_id].send(
+                receiver=dest_proc,
+                message=message,
+                ms=self.mes_service
+            )
+            self.save_time(proc_id=proc_id, timestamp=time, dest_proc=dest_proc)
+        return "sent_subproblems"
+
+    # round robin algorithm
+    def send_all_subs_to_all_proc_rr(self, proc_id):
+        probs = self.solvers[proc_id].getSubproblems(-1)
+        subs_to_send = {x: [] for x in range(self.processes_amount)}
+        subs_to_send.pop(proc_id)
+
+        probs_amnt = len(probs)
+        # part = 1 / (self.processes_amount - 1)
+        cnt = 0
+        while cnt < probs_amnt:
+            index = cnt % self.processes_amount
+            if index == proc_id:
+                cnt += 1
+                continue
+            subs_to_send[index].append(probs[cnt])
+            cnt += 1
+        for dest_proc in range(0, self.processes_amount):
+            if dest_proc == proc_id:
+                continue
+            message = sm.Message2(sender=proc_id,
+                                  dest=dest_proc,
+                                  mes_type="subproblems",
+                                  payload=subs_to_send[dest_proc],
                                   timestamp=self.timers[proc_id])
             state, outputs, time = self.communicators[proc_id].send(
                 receiver=dest_proc,
