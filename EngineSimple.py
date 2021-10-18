@@ -148,12 +148,12 @@ class Engine:
             cur_time = float(self.route_collector.frame[f'timestamp{i}'][-1].split('%')[1])
             if max_time < cur_time:
                 max_time = cur_time
-        with open('argtime.csv', 'a') as f:
+        with open('argtime-rr-big-values.csv', 'a') as f:
             f.write(f'\n{max_time},{self.arg}')
 
         print(f"subs_am={self.subs_am}")
-        self.route_collector.save()
-        self.comm_collector.save()
+        # self.route_collector.save()
+        # self.comm_collector.save()
 
     def start(self, proc_id, state):
         rcv_output = self.receive_message(proc_id=proc_id)
