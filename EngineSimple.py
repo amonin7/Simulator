@@ -48,7 +48,7 @@ class Engine:
 
     # TODO: вынести в отдельный метод вне ENGINE
     def initializeAll(self) -> None:
-        master = sb.MasterBalancer("start", max_depth=self.max_depth,
+        master = sb.MasterBalancer(max_depth=self.max_depth,
                                    proc_am=self.processes_amount,
                                    prc_blnc=self.price_blc,
                                    arg=self.arg
@@ -72,7 +72,7 @@ class Engine:
         self.state = ["starting"] * self.processes_amount
 
         for i in range(1, self.processes_amount):
-            slave = sb.SlaveBalancer("start", max_depth=self.max_depth, proc_am=self.processes_amount,
+            slave = sb.SlaveBalancer(max_depth=self.max_depth, proc_am=self.processes_amount,
                                      prc_blnc=self.price_blc,
                                      arg=self.arg
                                      )

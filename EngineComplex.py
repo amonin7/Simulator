@@ -4,7 +4,6 @@ import solver.SimpleSolver as slv
 import communicator.SimpleCommunicator as com
 import messages.MessageService as ms
 import messages.SimpleMessage as sm
-import numpy as np
 import route.TraceCollector as rc
 import route.CommunicationCollector as cc
 
@@ -51,7 +50,7 @@ class Engine:
 
     # TODO: вынести в отдельный метод вне ENGINE
     def initializeAll(self) -> None:
-        master = sb.MasterBalancer("start", max_depth=self.max_depth,
+        master = sb.MasterBalancer(max_depth=self.max_depth,
                                    proc_am=self.processes_amount,
                                    prc_blnc=self.price_blc
                                    ,
@@ -84,7 +83,7 @@ class Engine:
         self.state = ["starting"] * self.processes_amount
 
         for i in range(1, self.processes_amount):
-            slave = sb.SlaveBalancer("start", max_depth=self.max_depth, proc_am=self.processes_amount,
+            slave = sb.SlaveBalancer(max_depth=self.max_depth, proc_am=self.processes_amount,
                                      prc_blnc=self.price_blc
                                      ,
                                      alive_proc_am=self.processes_amount - 1
@@ -174,7 +173,6 @@ class Engine:
                 self.isDoneStatuses[proc_ind] = True
                 if proc_ind == 0:
                     print(self.route_collector.frame['timestamp0'][-1])
-                # break
             elif command == "send_all_exit_command":
                 while not outputs[0].empty():
                     (receiver, get_amount) = outputs[0].get()

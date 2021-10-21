@@ -1,18 +1,9 @@
 class SimpleBalancer:
 
-    def __init__(self, state, max_depth, proc_am, prc_blnc=0):
-        self._state = state
+    def __init__(self, max_depth, proc_am, prc_blnc=0):
         self.max_depth = max_depth
         self.prc_blnc = prc_blnc
         self.proc_am = proc_am
-
-    @property
-    def state(self):
-        return self._state
-
-    @state.setter
-    def state(self, value):
-        self._state = value
 
     def balance(self, state, subs_amount, add_args=None):
         print("Balancing")
@@ -20,8 +11,8 @@ class SimpleBalancer:
 
 class MasterBalancer(SimpleBalancer):
 
-    def __init__(self, state, max_depth, proc_am, prc_blnc, arg=5):
-        super().__init__(state, max_depth, proc_am, prc_blnc)
+    def __init__(self, max_depth, proc_am, prc_blnc, arg=5):
+        super().__init__(max_depth, proc_am, prc_blnc)
         self.arg = arg
 
     '''
@@ -32,27 +23,25 @@ class MasterBalancer(SimpleBalancer):
     '''
 
     def balance(self, state, subs_amount, add_args=None):
-        self.state = state
-        if self.state == "starting":
+        if state == "starting":
             return "solve", [self.proc_am * self.arg], self.prc_blnc
-        if self.state == "solved":
+        if state == "solved":
             return "send_all", [[-1], [-1]], self.prc_blnc
-        if self.state == "sent_subproblems":
+        if state == "sent_subproblems":
             return "exit", [], self.prc_blnc
 
 
 class SlaveBalancer(SimpleBalancer):
-    def __init__(self, state, max_depth, proc_am, prc_blnc, arg=5):
-        super().__init__(state, max_depth, proc_am, prc_blnc)
+    def __init__(self, max_depth, proc_am, prc_blnc, arg=5):
+        super().__init__(max_depth, proc_am, prc_blnc)
         self.arg = arg
 
     def balance(self, state, subs_amount, add_args=None):
-        self.state = state
-        if self.state == "starting":
+        if state == "starting":
             return "receive", [], self.prc_blnc
-        elif self.state == "received_subproblems":
+        elif state == "received_subproblems":
             return "solve", [-1], self.prc_blnc
-        elif self.state == "solved":
+        elif state == "solved":
             return "exit", [], self.prc_blnc
         else:
             return "bound", [], self.prc_blnc

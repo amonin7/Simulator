@@ -44,18 +44,10 @@ class Engine:
         self.state = []
 
     # TODO: вынести в отдельный метод вне ENGINE
-    def initializeAll(self) -> None:
-        master = sb.MasterBalancer("start", max_depth=self.max_depth,
+    def initialize_all(self) -> None:
+        master = sb.MasterBalancer(max_depth=self.max_depth,
                                    proc_am=self.processes_amount,
-                                   prc_blnc=self.price_blc
-                                   # ,
-                                   # alive_proc_am=self.processes_amount - 1
-                                   # ,
-                                   # T=self.max_depth,
-                                   # S=self.max_depth // 2,
-                                   # m=100,
-                                   # M=1000
-                                   )
+                                   prc_blnc=self.price_blc)
         self.balancers = [master]
         self.solvers = [slv.SimpleSolver(subproblems=[sp.SimpleSubProblem(0, 0, 0)],
                                          records=0,
@@ -65,9 +57,7 @@ class Engine:
                                          prc_slv=self.price_slv)]
         self.communicators = [com.SimpleCommunicator("ready",
                                                      proc_id=0,
-                                                     proc_am=self.processes_amount,
-                                                     prc_rcv=self.price_rcv,
-                                                     prc_snd=self.price_snd)]
+                                                     proc_am=self.processes_amount)]
         self.timers = [0.0] * self.processes_amount
         self.downtime = [0.0] * self.processes_amount
         self.isDoneStatuses = [False] * self.processes_amount
@@ -75,29 +65,19 @@ class Engine:
         self.state = ["starting"] * self.processes_amount
 
         for i in range(1, self.processes_amount):
-            slave = sb.SlaveBalancer("start", max_depth=self.max_depth, proc_am=self.processes_amount,
-                                     prc_blnc=self.price_blc
-                                     # ,
-                                     # alive_proc_am=self.processes_amount - 1
-                                     # ,
-                                     # T=self.max_depth,
-                                     # S=self.max_depth // 2,
-                                     # m=100,
-                                     # M=1000
-                                     )
+            slave = sb.SlaveBalancer(max_depth=self.max_depth, proc_am=self.processes_amount,
+                                     prc_blnc=self.price_blc)
             self.balancers.append(slave)
 
             solver = slv.SimpleSolver(subproblems=[], records=0, is_record_updated=False, max_depth=self.max_depth,
                                       prc_put=self.price_put, prc_slv=self.price_slv)
             self.solvers.append(solver)
 
-            communicator = com.SimpleCommunicator("ready", proc_id=i, proc_am=self.processes_amount,
-                                                  prc_rcv=self.price_rcv,
-                                                  prc_snd=self.price_snd)
+            communicator = com.SimpleCommunicator("ready", proc_id=i, proc_am=self.processes_amount)
             self.communicators.append(communicator)
 
     def run(self) -> None:
-        self.initializeAll()
+        self.initialize_all()
         proc_ind = 0
         while True:
             state = self.state[proc_ind]
@@ -113,7 +93,8 @@ class Engine:
                                                     subs_amount=self.solvers[proc_ind].get_sub_amount(),
                                                     add_args=[outputs, self.isSentRequest, proc_ind])
                     if command == "send_subproblems":
-                        self.state[proc_ind] = self.send_subproblems(proc_id=proc_ind, subs_am=outputs[1], dest_id=outputs[0])
+                        self.state[proc_ind] = self.send_subproblems(proc_id=proc_ind, subs_am=outputs[1],
+                                                                     dest_id=outputs[0])
                     elif command == "send_get_request":
                         self.state[proc_ind] = self.send_get_request(dest_proc_id=outputs[0],
                                                                      sender_proc_id=proc_ind,
