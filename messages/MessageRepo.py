@@ -2,14 +2,13 @@ from collections import defaultdict
 import heapq as hq
 
 
-class MessageService:
+class MessageRepo:
 
     def __init__(self):
         self.message_queue = defaultdict(list)
 
     def put_message(self, receiver: int, message) -> None:
         hq.heappush(self.message_queue[receiver], message)
-        # self.message_queue[receiver].append(message)
 
     def get_messages(self, receiver: int):
         messages = self.message_queue[receiver]

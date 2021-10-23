@@ -4,7 +4,7 @@ import balancer.SimpleBalancer as sb
 import subproblems.SimpleSubproblem as sp
 import solver.SimpleSolver as slv
 import communicator.SimpleCommunicator as com
-import messages.MessageService as ms
+import messages.MessageRepo as ms
 import messages.SimpleMessage as sm
 import numpy as np
 import route.TraceCollector as rc
@@ -31,7 +31,7 @@ class Engine:
         self.price_blc = price_balance  # price of balancing
         self.price_slv = price_solve  # price of solving
 
-        self.mes_service = ms.MessageService()
+        self.mes_service = ms.MessageRepo()
         self.route_collector = rc.TraceCollector('Trace.csv', self.processes_amount)
         self.comm_collector = cc.CommunicationCollector('Communication.csv')
         self.balancers = []
