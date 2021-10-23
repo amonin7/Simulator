@@ -18,7 +18,7 @@ class SimpleCommunicator:
     def send(self, receiver, message, ms) -> Tuple[str, float]:
         time = self.prc_snd0 + self.prc_snd1 * len(str(message))
         ms.put_message(receiver, message)
-        return "sent", [], time
+        return "sent", time
 
     # TODO: leave all arguments from the method
     def receive_one(self, receiver, ms) -> Tuple[str, Message, float]:

@@ -269,7 +269,7 @@ class Engine:
         return command, outputs
 
     def send_get_request(self, dest_proc_id, sender_proc_id, tasks_amount):
-        state, _, time = self.communicators[sender_proc_id].send(
+        state, time = self.communicators[sender_proc_id].send(
             receiver=dest_proc_id,
             message=sm.Message2(sender=sender_proc_id,
                                 dest=dest_proc_id,
@@ -289,7 +289,7 @@ class Engine:
                               mes_type="subproblems",
                               payload=self.solvers[proc_id].getSubproblems(subs_am),
                               timestamp=self.timers[proc_id])
-        state, outputs, time = self.communicators[proc_id].send(
+        state, time = self.communicators[proc_id].send(
             receiver=dest_id,
             message=message,
             ms=self.mes_service
@@ -326,7 +326,7 @@ class Engine:
                                   mes_type="subproblems",
                                   payload=message_list,
                                   timestamp=self.timers[proc_id])
-            state, outputs, time = self.communicators[proc_id].send(
+            state, time = self.communicators[proc_id].send(
                 receiver=dest_proc,
                 message=message,
                 ms=self.mes_service
