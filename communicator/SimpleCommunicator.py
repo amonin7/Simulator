@@ -1,6 +1,5 @@
 from typing import Tuple
 
-import messages.SimpleMessage
 from messages.SimpleMessage import Message2 as Message
 
 
