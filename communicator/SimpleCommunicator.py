@@ -5,13 +5,14 @@ from messages.SimpleMessage import Message2 as Message
 
 class SimpleCommunicator:
 
-    def __init__(self, proc_id, proc_am, prc_snd0=0, prc_snd1=0.0000003, prc_rcv0=0.007654, prc_rcv1=-1.51795035e-05):
+    def __init__(self, proc_id, proc_am, ms, prc_snd0=0, prc_snd1=0.0000003, prc_rcv0=0.007654, prc_rcv1=-1.51795035e-05):
         self.proc_id = proc_id
         self.proc_am = proc_am
         self.prc_snd0 = prc_snd0
         self.prc_snd1 = prc_snd1
         self.prc_rcv0 = prc_rcv0
         self.prc_rcv1 = prc_rcv1
+        self.ms = ms
 
     # TODO: make send return only 2 arguments
     def send(self, receiver, message, ms) -> Tuple[str, float]:
