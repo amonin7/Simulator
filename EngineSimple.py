@@ -60,11 +60,12 @@ class Engine:
                                          max_depth=self.max_depth,
                                          prc_put=self.price_put,
                                          prc_slv=self.price_slv)]
-        self.communicators = [com.SimpleCommunicator("ready",
-                                                     proc_id=0,
+        self.communicators = [com.SimpleCommunicator(proc_id=0,
                                                      proc_am=self.processes_amount,
+                                                     ms=self.mes_service,
                                                      prc_snd0=self.price_snd0,
                                                      prc_snd1=self.price_snd1)]
+
         self.timers = [0.0] * self.processes_amount
         self.downtime = [0.0] * self.processes_amount
         self.isDoneStatuses = [False] * self.processes_amount
@@ -82,7 +83,7 @@ class Engine:
                                       prc_put=self.price_put, prc_slv=self.price_slv)
             self.solvers.append(solver)
 
-            communicator = com.SimpleCommunicator("ready", proc_id=i, proc_am=self.processes_amount,
+            communicator = com.SimpleCommunicator(proc_id=i, proc_am=self.processes_amount, ms=self.mes_service,
                                                   prc_snd0=self.price_snd0, prc_snd1=self.price_snd1)
             self.communicators.append(communicator)
 
