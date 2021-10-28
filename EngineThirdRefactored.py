@@ -46,7 +46,7 @@ class Engine:
         self.state = []
 
     # TODO: вынести в отдельный метод вне ENGINE
-    def initializeAll(self) -> None:
+    def initialize_all(self) -> None:
         master = sb.MasterBalancer(max_depth=self.max_depth,
                                    proc_am=self.processes_amount,
                                    prc_blnc=self.price_blc
@@ -103,7 +103,7 @@ class Engine:
             self.communicators.append(communicator)
 
     def run(self) -> None:
-        self.initializeAll()
+        self.initialize_all()
         proc_ind = 0
         while True:
             state = self.state[proc_ind]
