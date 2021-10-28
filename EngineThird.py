@@ -182,7 +182,7 @@ class Engine:
         return command, outputs
 
     def receive_message(self, proc_id):
-        command, message, time_for_rcv = self.communicators[proc_id].receive_one(proc_id, self.mes_service)
+        command, message, time_for_rcv = self.communicators[proc_id]..receive_one(proc_id)
         if command == "put_message":
             if self.timers[proc_id] < message.timestamp:
                 self.route_collector.write(proc_id,
@@ -252,8 +252,7 @@ class Engine:
                                 mes_type="get_request",
                                 payload=tasks_amount,
                                 timestamp=self.timers[sender_proc_id]),
-            ms=self.mes_service
-        )
+                    )
         if state != "sent":
             raise Exception('Sending went wrong')
         # self.isSentRequest[sender_proc_id] = True
@@ -270,8 +269,7 @@ class Engine:
         state, time = self.communicators[proc_id].send(
             receiver=dest_id,
             message=message,
-            ms=self.mes_service
-        )
+                    )
         if state != "sent":
             raise Exception('Sending went wrong')
         self.save_time(proc_id=proc_id, timestamp=time, dest_proc=dest_id)
@@ -285,8 +283,7 @@ class Engine:
                                 mes_type="exit_command",
                                 payload=None,
                                 timestamp=self.timers[proc_id]),
-            ms=self.mes_service
-        )
+                    )
         if state != "sent":
             raise Exception('Sending went wrong')
         self.save_time(proc_id=proc_id, timestamp=time, dest_proc=proc_id)
@@ -307,8 +304,7 @@ class Engine:
             state, time = self.communicators[proc_id].send(
                 receiver=dest_proc,
                 message=message,
-                ms=self.mes_service
-            )
+                            )
             self.save_time(proc_id=proc_id, timestamp=time, dest_proc=dest_proc)
         return "sent_subproblems"
 
@@ -336,8 +332,7 @@ class Engine:
                         state, time = self.communicators[proc_id].send(
                             receiver=dest_proc,
                             message=message,
-                            ms=self.mes_service
-                        )
+                                                    )
                         is_sent = is_sent and (state == 'sent')
                         self.save_time(proc_id=proc_id, timestamp=time, dest_proc=dest_proc)
                 elif len(messages_to_send[1]) == 1:
@@ -358,8 +353,7 @@ class Engine:
                             state, time = self.communicators[proc_id].send(
                                 receiver=dest_proc,
                                 message=message,
-                                ms=self.mes_service
-                            )
+                                                            )
                             is_sent = is_sent and (state == 'sent')
                             self.save_time(proc_id=proc_id, timestamp=time, dest_proc=dest_proc)
                 elif len(messages_to_send[1]) != 1:
@@ -379,8 +373,7 @@ class Engine:
                     state, time = self.communicators[proc_id].send(
                         receiver=com_id,
                         message=message,
-                        ms=self.mes_service
-                    )
+                                            )
                     is_sent = is_sent and (state == 'sent')
                     self.save_time(proc_id=proc_id, timestamp=time, dest_proc=com_id)
                 if len(probs) > 0:
@@ -399,8 +392,7 @@ class Engine:
                     state, time = self.communicators[proc_id].send(
                         receiver=dest_proc,
                         message=message,
-                        ms=self.mes_service
-                    )
+                                            )
                     is_sent = is_sent and (state == 'sent')
                     self.save_time(proc_id=proc_id, timestamp=time, dest_proc=dest_proc)
 
