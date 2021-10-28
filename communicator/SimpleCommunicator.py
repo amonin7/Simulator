@@ -15,13 +15,13 @@ class SimpleCommunicator:
         self.ms = ms
 
     # TODO: make send return only 2 arguments
-    def send(self, receiver, message, ms) -> Tuple[str, float]:
+    def send(self, receiver, message) -> Tuple[str, float]:
         time = self.prc_snd0 + self.prc_snd1 * len(str(message))
         self.ms.put_message(receiver, message)
         return "sent", time
 
     # TODO: leave all arguments from the method
-    def receive_one(self, receiver, ms) -> Tuple[str, Message, float]:
+    def receive_one(self, receiver) -> Tuple[str, Message, float]:
         message = self.ms.get_one_message(receiver)
         time = self.prc_rcv0 + self.prc_rcv1 * len(str(message))
         if message is not None:
