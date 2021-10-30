@@ -16,8 +16,8 @@ class Engine:
                  arg=7,
                  price_put=0.0,
                  price_get=0.0,
-                 price_solve=0.0000639,
-                 price_balance=0.0000158,
+                 price_solve=0.0000121,
+                 price_balance=0.0000045,
                  price_receive=0.0003929,
                  price_send0=-0.0004077014276206508,
                  price_send1=7.11110464e-06):
@@ -159,15 +159,15 @@ class Engine:
             cur_time = float(self.route_collector.frame[f'timestamp{i}'][-1].split('%')[1])
             if max_time < cur_time:
                 max_time = cur_time
-        with open('argtime-ls-new.csv', 'a') as f:
+        with open('argtime-ls-all-26.csv', 'a') as f:
             f.write(f'\n{max_time},{self.arg},{self.max_depth}')
 
         print(f"subs_am={self.subs_am}")
-        # self.route_collector.save()
+        self.route_collector.save()
         # self.comm_collector.save()
 
     def receive_message(self, proc_id):
-        command, message, time_for_rcv = self.communicators[proc_id]..receive_one(proc_id)
+        command, message, time_for_rcv = self.communicators[proc_id].receive_one(proc_id)
         if command == "put_message":
             if self.timers[proc_id] < message.timestamp:
                 self.route_collector.write(proc_id,
@@ -231,8 +231,7 @@ class Engine:
                                 dest=dest_proc_id,
                                 mes_type="get_request",
                                 payload=tasks_amount,
-                                timestamp=self.timers[sender_proc_id]),
-                    )
+                                timestamp=self.timers[sender_proc_id]))
         if state != "sent":
             raise Exception('Sending went wrong')
         self.save_time(proc_id=sender_proc_id, timestamp=time, dest_proc=dest_proc_id)
@@ -246,22 +245,20 @@ class Engine:
                               timestamp=self.timers[proc_id])
         state, time = self.communicators[proc_id].send(
             receiver=dest_id,
-            message=message,
-                    )
+            message=message)
         if state != "sent":
             raise Exception('Sending went wrong')
         self.save_time(proc_id=proc_id, timestamp=time, dest_proc=dest_id)
         return "sent_subproblems"
 
     def send_exit(self, proc_id, dest_id):
-        state, _, time = self.communicators[proc_id].send(
+        state, time = self.communicators[proc_id].send(
             receiver=dest_id,
             message=sm.Message2(sender=proc_id,
                                 dest=dest_id,
                                 mes_type="exit_command",
                                 payload=None,
-                                timestamp=self.timers[proc_id]),
-                    )
+                                timestamp=self.timers[proc_id]))
         if state != "sent":
             raise Exception('Sending went wrong')
         self.save_time(proc_id=proc_id, timestamp=time, dest_proc=proc_id)
@@ -281,8 +278,7 @@ class Engine:
                                   timestamp=self.timers[proc_id])
             state, time = self.communicators[proc_id].send(
                 receiver=dest_proc,
-                message=message,
-                            )
+                message=message)
             self.save_time(proc_id=proc_id, timestamp=time, dest_proc=dest_proc)
         return "sent_subproblems"
 
@@ -313,8 +309,7 @@ class Engine:
                                   timestamp=self.timers[proc_id])
             state, time = self.communicators[proc_id].send(
                 receiver=dest_proc,
-                message=message,
-                            )
+                message=message)
             self.save_time(proc_id=proc_id, timestamp=time, dest_proc=dest_proc)
         return "sent_subproblems"
 
@@ -327,5 +322,5 @@ class Engine:
 
 
 if __name__ == "__main__":
-    eng = Engine(proc_amount=10, max_depth=24, arg=50)
+    eng = Engine(proc_amount=8, max_depth=26, arg=150)
     eng.run()
