@@ -16,11 +16,11 @@ class Engine:
                  arg=7,
                  price_put=0.0,
                  price_get=0.0,
-                 price_solve=0.0000121,
+                 price_solve=0.0000160,
                  price_balance=0.0000045,
                  price_receive=0.0003929,
-                 price_send0=-0.0004077014276206508,
-                 price_send1=7.11110464e-06):
+                 price_send0=0.000040770,
+                 price_send1=0):
         self.arg = arg
         self.processes_amount = proc_amount  # amount of simulated processes
         self.max_depth = max_depth  # max depth of solving tree
@@ -33,7 +33,7 @@ class Engine:
         self.price_slv = price_solve  # price of solving
 
         self.mes_service = ms.MessageRepo()
-        self.route_collector = rc.TraceCollector('TraceS.csv', self.processes_amount)
+        self.route_collector = rc.TraceCollector(f'Trace{self.arg}.csv', self.processes_amount)
         self.comm_collector = cc.CommunicationCollector('CommunicationS.csv')
         self.balancers = []
         self.solvers = []
@@ -159,10 +159,11 @@ class Engine:
             cur_time = float(self.route_collector.frame[f'timestamp{i}'][-1].split('%')[1])
             if max_time < cur_time:
                 max_time = cur_time
-        with open('argtime-ls-all-26.csv', 'a') as f:
+        with open('argtime-ls-all-26-big.csv', 'a') as f:
             f.write(f'\n{max_time},{self.arg},{self.max_depth}')
 
-        print(f"subs_am={self.subs_am}")
+        print(f"time={max_time}")
+        # print(f"subs_am={self.subs_am}")
         self.route_collector.save()
         # self.comm_collector.save()
 
@@ -322,5 +323,5 @@ class Engine:
 
 
 if __name__ == "__main__":
-    eng = Engine(proc_amount=8, max_depth=26, arg=150)
+    eng = Engine(proc_amount=8, max_depth=26, arg=400)
     eng.run()

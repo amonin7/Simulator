@@ -12,7 +12,6 @@ class MasterBalancer(sb.SimpleBalancer):
 
     def balance(self, state, subs_amount, add_args=None) -> Tuple[str, list]:
         if state == "starting":
-            print(self.arg)
             return "solve", [self.proc_am * self.arg]
         elif state == "solved":
             return "receive", []
