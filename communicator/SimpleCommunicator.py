@@ -14,7 +14,6 @@ class SimpleCommunicator:
         self.prc_rcv1 = prc_rcv1
         self.ms = ms
 
-    # TODO: make send return only 2 arguments
     def send(self, receiver, message) -> Tuple[str, float]:
         time = self.prc_snd0 + self.prc_snd1 * len(str(message))
         self.ms.put_message(receiver, message)
