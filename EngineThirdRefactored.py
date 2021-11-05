@@ -178,7 +178,7 @@ class Engine:
         return command, outputs
 
     def receive_message(self, proc_id):
-        command, message, time_for_rcv = self.communicators[proc_id].receive_one(proc_id)
+        command, message, time_for_rcv = self.communicators[proc_id].receive_one()
         if command == "put_message":
             if self.timers[proc_id] < message.timestamp:
                 self.route_collector.write(proc_id,

@@ -20,8 +20,8 @@ class SimpleCommunicator:
         return "sent", time
 
     # TODO: leave all arguments from the method
-    def receive_one(self, receiver) -> Tuple[str, Message, float]:
-        message = self.ms.get_one_message(receiver)
+    def receive_one(self) -> Tuple[str, Message, float]:
+        message = self.ms.get_one_message(self.proc_id)
         time = self.prc_rcv0 + self.prc_rcv1 * len(str(message))
         if message is not None:
             return "put_message", message, time
