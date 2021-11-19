@@ -3,7 +3,7 @@ from typing import Tuple
 import balancer.SimpleBalancer as sb
 
 
-class MasterBalancer(sb.SimpleBalancer):
+class MasterBalancer(sb.GenericBalancer):
 
     def __init__(self, max_depth, proc_am, prc_blnc, alive_proc_am=None, arg=5):
         super().__init__(max_depth, proc_am, prc_blnc)
@@ -41,7 +41,7 @@ class MasterBalancer(sb.SimpleBalancer):
             raise Exception(f"Wrong state={state}")
 
 
-class SlaveBalancer(sb.SimpleBalancer):
+class SlaveBalancer(sb.GenericBalancer):
 
     def __init__(self, max_depth, proc_am, prc_blnc, arg=5):
         super().__init__(max_depth, proc_am, prc_blnc)

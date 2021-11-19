@@ -1,4 +1,4 @@
-class SimpleBalancer:
+class GenericBalancer:
 
     def __init__(self, max_depth, proc_am, prc_blnc=0):
         self.max_depth = max_depth
@@ -9,7 +9,7 @@ class SimpleBalancer:
         print("Balancing")
 
 
-class MasterBalancer(SimpleBalancer):
+class MasterBalancer(GenericBalancer):
 
     def __init__(self, max_depth, proc_am, prc_blnc, arg=5):
         super().__init__(max_depth, proc_am, prc_blnc)
@@ -31,7 +31,7 @@ class MasterBalancer(SimpleBalancer):
             return "exit", [], self.prc_blnc
 
 
-class SlaveBalancer(SimpleBalancer):
+class SlaveBalancer(GenericBalancer):
     def __init__(self, max_depth, proc_am, prc_blnc, arg=5):
         super().__init__(max_depth, proc_am, prc_blnc)
         self.arg = arg

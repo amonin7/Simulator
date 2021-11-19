@@ -3,7 +3,7 @@ from queue import Queue
 import balancer.SimpleBalancer as sb
 
 
-class MasterBalancer(sb.SimpleBalancer):
+class MasterBalancer(sb.GenericBalancer):
     def __init__(self, max_depth, proc_am, prc_blnc, T=0, S=10, m=50, M=100, arg=10):
         super().__init__(max_depth, proc_am, prc_blnc)
         self.T = T
@@ -54,7 +54,7 @@ class MasterBalancer(sb.SimpleBalancer):
             raise Exception(f"Wrong state={state}")
 
 
-class SlaveBalancer(sb.SimpleBalancer):
+class SlaveBalancer(sb.GenericBalancer):
 
     def __init__(self, max_depth, proc_am, prc_blnc, alive_proc_am=0, T=200, S=10, m=0, M=0, arg=5):
         super().__init__(max_depth, proc_am, prc_blnc)

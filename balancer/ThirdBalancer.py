@@ -1,7 +1,7 @@
 import balancer.SimpleBalancer as sb
 
 
-class MasterBalancer(sb.SimpleBalancer):
+class MasterBalancer(sb.GenericBalancer):
     def __init__(self, max_depth, proc_am, prc_blnc, alive_proc_am, T, S, m, M, arg=5):
         super().__init__(max_depth, proc_am, prc_blnc)
         self.alive_proc_am = alive_proc_am
@@ -39,7 +39,7 @@ class MasterBalancer(sb.SimpleBalancer):
                 return "receive", []
 
 
-class SlaveBalancer(sb.SimpleBalancer):
+class SlaveBalancer(sb.GenericBalancer):
 
     def __init__(self, max_depth, proc_am, prc_blnc, alive_proc_am, T, S, m, M, arg=5):
         super().__init__(max_depth, proc_am, prc_blnc)
